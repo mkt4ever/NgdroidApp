@@ -19,7 +19,15 @@ public class GameCanvas extends BaseCanvas {
 
     private Bitmap spriteSheet, tileset;
     private Rect karesrc, karedst, tilesrc , tiledst;
-    private int kareno, karerow;
+    private int kareno;
+    private int tilew, tileh, tilesw, tilesh;
+    private int spritew, spriteh, spritesw, spritesh;
+    private int spritex, spritey;
+    private int spritedx;
+    private int animationFirstKareNo[] , animationLastKareNo[];
+    private int animationAdedi = 4;
+    private int animationNo;
+
 
     public GameCanvas(NgApp ngApp) {
 
@@ -35,12 +43,39 @@ public class GameCanvas extends BaseCanvas {
         karesrc = new Rect();
         karedst = new Rect();
 
-        kareno = 1;
-        karerow = 0;
+        kareno = 0;
 
         tileset = Utils.loadImage(root,"tilea2.png");
         tilesrc = new Rect();
         tiledst = new Rect();
+
+        tilesw = 64;
+        tilesh = 64;
+        tilew =  128;
+        tileh =  128;
+
+        spritesw = 128;
+        spritesh = 128;
+        spritew =  256;
+        spriteh =  256;
+
+        spritex = 0;
+        spritey = 0;
+
+        spritedx = spritew /8;
+
+        animationFirstKareNo = new int[animationAdedi];
+        animationFirstKareNo[0] = 0;
+        animationFirstKareNo[1] = 1;
+        animationFirstKareNo[2] = 9;
+        animationFirstKareNo[3] = 12;
+        animationLastKareNo =  new int[animationAdedi];
+        animationLastKareNo[0] = 0;
+        animationLastKareNo[1] = 8;
+        animationLastKareNo[2] = 11;
+        animationLastKareNo[3] = 14;
+
+        animationNo = 1;
     }
 
 
@@ -49,36 +84,31 @@ public class GameCanvas extends BaseCanvas {
 
         //Log.i(TAG, "update");
 
-        tilesrc.set(0, 0, 64, 64);
-
-        karesrc.set(kareno * 128,karerow * 128,(kareno + 1) * 128, (karerow + 1) *128);   // take the first carecter from the image .. left and top are zeros ..
-        // right and bottom are the dimensions of the first carechter which is 128*128
         kareno ++;
-        if (kareno > 8) {
-            kareno = 1;
-            karerow++;
-        }
-        if (karerow > 9) karerow = 0;
+        if (kareno > animationLastKareNo[animationNo]) kareno = animationFirstKareNo[animationNo];
 
-        karedst.set(0,0,128,128);   // define where to draw it
-        // it's left border, top border, right , bottom
-        // we can use this to make it bigger or smaller
+        spritex += spritedx;
+        if (spritex > getWidth() - spritew) {
+            spritex = getWidth() - spritew;
+            animationNo = 0;
+        }
     }
 
     public void draw(Canvas canvas) {
         //canvas.drawBitmap(spriteSheet,0,0,null);    // test drawing the loaded Bitmap image to the screen, zeros are float left and top
 
-        for (int i = 0; i < getWidth(); i+= 64)
+        for (int i = 0; i < getWidth(); i+= tilew)
         {
-            for (int j = 0; j < getHeight(); j+= 64)
+            for (int j = 0; j < getHeight(); j+= tileh)
             {
-                tiledst.set(i, j, i+64, j+64);
+                tilesrc.set(0, 0, tilesw, tilesh);
+                tiledst.set(i, j, i+tilew, j+tileh);
                 canvas.drawBitmap(tileset,tilesrc,tiledst,null);    // test drawing the loaded Bitmap image to the screen, zeros are float left and top
             }
 
         }
-
-
+        karesrc.set(kareno * spritesw,0,(kareno + 1) * spritesw, spritesh);
+        karedst.set(spritex,spritey,spritew + spritex,spriteh + spritey);
         canvas.drawBitmap(spriteSheet,karesrc,karedst,null);    // modified to draw the first carechter which is defined by the karesrc and karedst
         //Log.i(TAG, "draw");
     }
